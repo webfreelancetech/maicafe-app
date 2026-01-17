@@ -1,0 +1,32 @@
+# Laravel vendor directory
+maicafe-app/vendor/
+
+# Environment files (contains secrets)
+maicafe-app/.env
+.env
+
+# Laravel storage (cache, sessions, logs)
+maicafe-app/storage/framework/cache/data/
+maicafe-app/storage/framework/sessions/
+maicafe-app/storage/framework/views/
+maicafe-app/storage/logs/
+
+# Laravel compiled files
+maicafe-app/bootstrap/cache/*.php
+!maicafe-app/bootstrap/cache/.gitignore
+
+# Node modules
+maicafe-app/node_modules/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# PHP
+*.phpunit.result.cache
