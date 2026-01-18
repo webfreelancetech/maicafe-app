@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\BannerController;
 use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\WishlistController;
 
 /*
 |--------------------------------------------------------------------------
@@ -82,6 +83,18 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', [OrderController::class, 'store']);
         Route::get('/by-token', [OrderController::class, 'getByToken']);
         Route::get('/{id}', [OrderController::class, 'show']);
+    });
+
+    // Wishlist
+    Route::prefix('wishlist')->group(function () {
+        Route::get('/', [WishlistController::class, 'index']);          // Get user's wishlist
+        Route::post('/', [WishlistController::class, 'store']);         // Add product to wishlist
+        Route::post('/toggle', [WishlistController::class, 'toggle']);  // Toggle product in wishlist
+        Route::get('/count', [WishlistController::class, 'count']);     // Get wishlist item count
+        Route::post('/check', [WishlistController::class, 'checkMultiple']); // Check multiple products
+        Route::delete('/clear', [WishlistController::class, 'clear']);  // Clear entire wishlist
+        Route::get('/check/{productId}', [WishlistController::class, 'check']); // Check if product is in wishlist
+        Route::delete('/{productId}', [WishlistController::class, 'destroy']); // Remove product from wishlist
     });
     
     // Legacy route for backward compatibility

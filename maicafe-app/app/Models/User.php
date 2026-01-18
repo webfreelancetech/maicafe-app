@@ -81,4 +81,29 @@ class User extends Authenticatable
         $count = $completedOrders->count();
         return $count > 0 ? $completedOrders->sum('total') / $count : 0;
     }
+
+    /**
+     * Get user's wishlist items.
+     */
+    public function wishlistItems()
+    {
+        return $this->hasMany(Wishlist::class);
+    }
+
+    /**
+     * Get products in user's wishlist.
+     */
+    public function wishlist()
+    {
+        return $this->belongsToMany(Product::class, 'wishlists')
+            ->withTimestamps();
+    }
+
+    /**
+     * Get wishlist count.
+     */
+    public function getWishlistCountAttribute()
+    {
+        return $this->wishlistItems()->count();
+    }
 }
