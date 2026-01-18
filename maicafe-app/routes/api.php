@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\BannerController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\WishlistController;
+use App\Http\Controllers\Api\CartController;
 
 /*
 |--------------------------------------------------------------------------
@@ -77,12 +78,31 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{id}', [BannerController::class, 'show']);
     });
 
+    // Cart
+    Route::prefix('cart')->group(function () {
+        Route::get('/', [CartController::class, 'index']);              // Get cart
+        Route::post('/items', [CartController::class, 'addItem']);      // Add item to cart
+        Route::put('/items/{itemId}', [CartController::class, 'updateItem']);   // Update item quantity
+        Route::delete('/items/{itemId}', [CartController::class, 'removeItem']); // Remove item
+        Route::delete('/clear', [CartController::class, 'clear']);      // Clear cart
+        Route::get('/count', [CartController::class, 'count']);         // Get cart count
+        Route::post('/coupon', [CartController::class, 'applyCoupon']); // Apply coupon
+        Route::delete('/coupon', [CartController::class, 'removeCoupon']); // Remove coupon
+        Route::put('/notes', [CartController::class, 'updateNotes']);   // Update notes
+        Route::put('/store', [CartController::class, 'setStore']);      // Set store
+    });
+
     // Orders
     Route::prefix('orders')->group(function () {
-        Route::get('/', [OrderController::class, 'index']);
-        Route::post('/', [OrderController::class, 'store']);
-        Route::get('/by-token', [OrderController::class, 'getByToken']);
-        Route::get('/{id}', [OrderController::class, 'show']);
+        Route::get('/', [OrderController::class, 'index']);             // Get user orders
+        Route::post('/', [OrderController::class, 'store']);            // Create order (legacy - direct items)
+        Route::post('/checkout', [OrderController::class, 'checkout']); // Checkout from cart
+        Route::get('/by-token', [OrderController::class, 'getByToken']); // Get by token
+        Route::get('/{id}', [OrderController::class, 'show']);          // Get order details
+        Route::get('/{id}/track', [OrderController::class, 'track']);   // Track order status
+        Route::post('/{id}/cancel', [OrderController::class, 'cancel']); // Cancel order
+        Route::post('/{id}/reorder', [OrderController::class, 'reorder']); // Reorder items to cart
+        Route::post('/{id}/payment/confirm', [OrderController::class, 'confirmPayment']); // Confirm payment
     });
 
     // Wishlist

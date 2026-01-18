@@ -106,4 +106,20 @@ class User extends Authenticatable
     {
         return $this->wishlistItems()->count();
     }
+
+    /**
+     * Get user's cart.
+     */
+    public function cart()
+    {
+        return $this->hasOne(Cart::class);
+    }
+
+    /**
+     * Get or create user's cart.
+     */
+    public function getOrCreateCart()
+    {
+        return Cart::getOrCreateForUser($this->id);
+    }
 }

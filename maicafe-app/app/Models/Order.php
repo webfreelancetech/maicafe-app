@@ -10,13 +10,16 @@ class Order extends Model
 {
     protected $fillable = [
         'order_number', 'daily_token', 'token_date', 'user_id', 'store_id', 
-        'customer_name', 'customer_email', 'customer_phone', 'customer_address', 
-        'subtotal', 'tax', 'discount', 'total', 'status', 'notes'
+        'customer_name', 'customer_email', 'customer_phone', 'customer_address',
+        'delivery_address', 'order_type', 'subtotal', 'tax', 'delivery_charge',
+        'discount', 'coupon_code', 'total', 'status', 'notes',
+        'payment_method', 'payment_status', 'payment_reference'
     ];
 
     protected $casts = [
         'subtotal' => 'decimal:2',
         'tax' => 'decimal:2',
+        'delivery_charge' => 'decimal:2',
         'discount' => 'decimal:2',
         'total' => 'decimal:2',
         'token_date' => 'date',
