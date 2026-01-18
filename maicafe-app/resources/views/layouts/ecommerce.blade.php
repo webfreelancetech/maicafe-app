@@ -457,6 +457,7 @@
                     <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}">Home</a>
                     <a href="{{ route('menu') }}" class="{{ request()->routeIs('menu') ? 'active' : '' }}">Menu</a>
                     <a href="{{ route('stores') }}" class="{{ request()->routeIs('stores') ? 'active' : '' }}">Stores</a>
+                    <a href="{{ route('order-display') }}" class="{{ request()->routeIs('order-display') ? 'active' : '' }}">Order Status</a>
                     @auth
                         <div class="user-dropdown" style="position: relative; display: inline-block;">
                             <a href="#" style="text-decoration: none; color: #3d2817;">
@@ -502,6 +503,7 @@
                 <li><a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}"><i class="fas fa-home"></i> Home</a></li>
                 <li><a href="{{ route('menu') }}" class="{{ request()->routeIs('menu') ? 'active' : '' }}"><i class="fas fa-utensils"></i> Menu</a></li>
                 <li><a href="{{ route('stores') }}"><i class="fas fa-store"></i> Stores</a></li>
+                <li><a href="{{ route('order-display') }}"><i class="fas fa-receipt"></i> Order Status</a></li>
                 <li><a href="{{ route('cart') }}"><i class="fas fa-shopping-cart"></i> Cart <span id="mobileCartCount" style="margin-left: auto; background: #ef4444; color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 11px;">0</span></a></li>
                 @auth
                     <li><a href="#"><i class="fas fa-user"></i> My Account</a></li>
@@ -535,6 +537,10 @@
             <a href="{{ route('menu') }}" class="bottom-nav-item {{ request()->routeIs('menu') ? 'active' : '' }}">
                 <i class="fas fa-utensils"></i>
                 <span>Menu</span>
+            </a>
+            <a href="{{ route('order-display') }}" class="bottom-nav-item {{ request()->routeIs('order-display') ? 'active' : '' }}">
+                <i class="fas fa-receipt"></i>
+                <span>Status</span>
             </a>
             <a href="{{ route('cart') }}" class="bottom-nav-item {{ request()->routeIs('cart') ? 'active' : '' }}" style="position: relative;">
                 <i class="fas fa-shopping-cart"></i>

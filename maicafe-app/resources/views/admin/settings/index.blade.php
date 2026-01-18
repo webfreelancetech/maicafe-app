@@ -164,12 +164,17 @@
                 <select name="country" id="country" required>
                     @php
                         $currentCountry = \App\Models\Setting::get('country', 'GB');
+                        $currentCurrency = \App\Models\Setting::get('currency_symbol', '£');
+                        $currentCurrencyCode = \App\Models\Setting::get('currency_code', 'GBP');
                     @endphp
                     <option value="GB" {{ $currentCountry === 'GB' ? 'selected' : '' }}>United Kingdom</option>
                     <option value="US" {{ $currentCountry === 'US' ? 'selected' : '' }}>United States</option>
                     <option value="EU" {{ $currentCountry === 'EU' ? 'selected' : '' }}>Europe</option>
                     <option value="IN" {{ $currentCountry === 'IN' ? 'selected' : '' }}>India</option>
                 </select>
+                <small style="color: #6b7280; display: block; margin-top: 8px;">
+                    <i class="fas fa-info-circle"></i> Current Currency: <strong>{{ $currentCurrency }} ({{ $currentCurrencyCode }})</strong>
+                </small>
             </div>
 
             <div class="form-group">

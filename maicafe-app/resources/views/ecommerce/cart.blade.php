@@ -249,15 +249,15 @@
             <h2>Order Summary</h2>
             <div class="summary-row">
                 <span>Subtotal:</span>
-                <span id="subtotal">$0.00</span>
+                <span id="subtotal">£0.00</span>
             </div>
             <div class="summary-row">
                 <span>Tax:</span>
-                <span id="tax">$0.00</span>
+                <span id="tax">£0.00</span>
             </div>
             <div class="summary-row total">
                 <span>Total:</span>
-                <span id="total">$0.00</span>
+                <span id="total">£0.00</span>
             </div>
             <button class="checkout-btn" id="checkoutBtn" onclick="proceedToCheckout()">
                 Proceed to Checkout
@@ -270,7 +270,7 @@
 @push('scripts')
 <script>
     // Get currency symbol from PHP
-    const currencySymbol = '{{ $currencySymbol ?? "$" }}';
+    const currencySymbol = '{{ $currencySymbol ?? "£" }}';
     const taxRate = {{ $taxRate ?? 0 }};
     
     function loadCart() {

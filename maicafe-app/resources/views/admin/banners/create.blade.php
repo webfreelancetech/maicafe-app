@@ -41,10 +41,18 @@
             <input type="file" name="image" id="image" accept="image/*" required>
         </div>
 
-        <div class="form-group">
-            <div class="checkbox-group">
-                <input type="checkbox" name="is_active" id="is_active" value="1" {{ old('is_active', true) ? 'checked' : '' }}>
-                <label for="is_active">Active</label>
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="sort_order">Sort Order</label>
+                <input type="number" name="sort_order" id="sort_order" value="{{ old('sort_order', 0) }}" min="0">
+                <small style="color: #6b7280; margin-top: 4px; display: block;">Lower numbers appear first. Banners with same order are sorted by date.</small>
+            </div>
+
+            <div class="form-group">
+                <div class="checkbox-group" style="margin-top: 28px;">
+                    <input type="checkbox" name="is_active" id="is_active" value="1" {{ old('is_active', true) ? 'checked' : '' }}>
+                    <label for="is_active">Active</label>
+                </div>
             </div>
         </div>
 

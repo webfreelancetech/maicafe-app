@@ -1,12 +1,14 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    RewriteBase /maicafe-app/
     
     # Skip if already in public folder
     RewriteCond %{REQUEST_URI} ^/maicafe-app/maicafe-app/public
     RewriteRule ^ - [L]
     
-    # Redirect all requests to Laravel public folder (external redirect)
+    # Internal rewrite to Laravel public folder (preserves POST method)
     RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^(.*)$ /maicafe-app/maicafe-app/public/$1 [R=302,L]
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ maicafe-app/public/$1 [L]
 </IfModule>
 

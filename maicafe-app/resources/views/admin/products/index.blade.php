@@ -35,10 +35,37 @@
                     </div>
                     @endif
                 </td>
-                <td>{{ $product->name }}</td>
+                <td>
+                    {{ $product->name }}
+                    @if($product->has_variants)
+                    <span class="badge" style="background: #e0e7ff; color: #3730a3; font-size: 10px; margin-left: 6px;">
+                        {{ $product->variants->count() }} variants
+                    </span>
+                    @endif
+                </td>
                 <td>{{ $product->category->name ?? 'N/A' }}</td>
-                <td>£{{ number_format($product->price, 2) }}</td>
-                <td>{{ $product->stock_quantity }}</td>
+                <td>
+                    @if($product->has_variants && $product->variants->count() > 0)
+                        @php
+                            $minPrice = $product->variants->min('price');
+                            $maxPrice = $product->variants->max('price');
+                        @endphp
+                        @if($minPrice == $maxPrice)
+                            £{{ number_format($minPrice, 2) }}
+                        @else
+                            £{{ number_format($minPrice, 2) }} - £{{ number_format($maxPrice, 2) }}
+                        @endif
+                    @else
+                        £{{ number_format($product->price, 2) }}
+                    @endif
+                </td>
+                <td>
+                    @if($product->has_variants && $product->variants->count() > 0)
+                        {{ $product->variants->sum('stock_quantity') }}
+                    @else
+                        {{ $product->stock_quantity }}
+                    @endif
+                </td>
                 <td>
                     <span class="badge {{ $product->is_active ? 'badge-success' : 'badge-danger' }}">
                         {{ $product->is_active ? 'Active' : 'Inactive' }}

@@ -719,6 +719,10 @@
                 <i class="fas fa-image"></i>
                 <span>Banners</span>
             </a>
+            <a href="{{ route('admin.addons.index') }}" class="nav-item {{ request()->routeIs('admin.addons.*') ? 'active' : '' }}">
+                <i class="fas fa-puzzle-piece"></i>
+                <span>Add-ons & Extras</span>
+            </a>
         </nav>
     </div>
     

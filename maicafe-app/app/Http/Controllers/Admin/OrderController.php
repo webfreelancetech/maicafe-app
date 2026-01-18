@@ -11,7 +11,7 @@ class OrderController extends Controller
 {
     public function index()
     {
-        $orders = Order::with('user', 'store')->latest()->paginate(15);
+        $orders = Order::with(['user', 'store', 'items'])->latest()->paginate(15);
         return view('admin.orders.index', compact('orders'));
     }
 
@@ -24,7 +24,7 @@ class OrderController extends Controller
     public function updateStatus(Request $request, Order $order)
     {
         $validated = $request->validate([
-            'status' => 'required|in:pending,processing,completed,cancelled',
+            'status' => 'required|in:pending,confirmed,preparing,ready,out_for_delivery,completed,cancelled',
         ]);
 
         $oldStatus = $order->status;
@@ -41,6 +41,80 @@ class OrderController extends Controller
         }
 
         return redirect()->back()->with('success', 'Order status updated successfully!');
+    }
+
+    /**
+     * Kitchen display for today's orders
+     */
+    public function kitchen(Request $request)
+    {
+        $date = $request->get('date', now()->toDateString());
+        
+        // Get orders grouped by status
+        $pendingOrders = Order::with('items')
+            ->forDate($date)
+            ->whereIn('status', ['pending', 'confirmed'])
+            ->orderBy('daily_token')
+            ->get();
+
+        $preparingOrders = Order::with('items')
+            ->forDate($date)
+            ->where('status', 'preparing')
+            ->orderBy('daily_token')
+            ->get();
+
+        $readyOrders = Order::with('items')
+            ->forDate($date)
+            ->whereIn('status', ['ready', 'out_for_delivery'])
+            ->orderBy('daily_token')
+            ->get();
+
+        $completedOrders = Order::with('items')
+            ->forDate($date)
+            ->where('status', 'completed')
+            ->orderBy('daily_token', 'desc')
+            ->limit(10)
+            ->get();
+
+        return view('admin.orders.kitchen', compact(
+            'pendingOrders', 
+            'preparingOrders', 
+            'readyOrders', 
+            'completedOrders',
+            'date'
+        ));
+    }
+
+    /**
+     * API endpoint for kitchen display updates
+     */
+    public function kitchenData(Request $request)
+    {
+        $date = $request->get('date', now()->toDateString());
+
+        $orders = Order::with('items')
+            ->forDate($date)
+            ->whereNotIn('status', ['completed', 'cancelled'])
+            ->orderBy('daily_token')
+            ->get()
+            ->map(function ($order) {
+                return [
+                    'id' => $order->id,
+                    'token' => $order->formatted_token,
+                    'status' => $order->status,
+                    'order_type' => $order->order_type,
+                    'items' => $order->items->map(function ($item) {
+                        return [
+                            'name' => $item->product_name,
+                            'quantity' => $item->quantity,
+                            'customizations' => $item->customizations,
+                        ];
+                    }),
+                    'created_at' => $order->created_at->format('H:i'),
+                ];
+            });
+
+        return response()->json(['orders' => $orders]);
     }
 }
 

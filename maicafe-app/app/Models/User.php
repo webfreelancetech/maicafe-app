@@ -47,4 +47,38 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * Get all orders for the user.
+     */
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    /**
+     * Get completed orders for the user.
+     */
+    public function completedOrders()
+    {
+        return $this->hasMany(Order::class)->where('status', 'completed');
+    }
+
+    /**
+     * Get total amount spent by the user.
+     */
+    public function getTotalSpentAttribute()
+    {
+        return $this->orders()->where('status', 'completed')->sum('total');
+    }
+
+    /**
+     * Get average order value.
+     */
+    public function getAverageOrderValueAttribute()
+    {
+        $completedOrders = $this->orders()->where('status', 'completed');
+        $count = $completedOrders->count();
+        return $count > 0 ? $completedOrders->sum('total') / $count : 0;
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Admin\Traits\HandlesImageUploads;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -10,6 +11,7 @@ use Illuminate\Support\Str;
 
 class CategoryController extends Controller
 {
+    use HandlesImageUploads;
     public function index()
     {
         $categories = Category::latest()->paginate(15);
@@ -32,7 +34,11 @@ class CategoryController extends Controller
         $validated['slug'] = Str::slug($validated['name']);
 
         if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')->store('categories', 'public');
+            $validated['image'] = $this->storeImageWithSeoName(
+                $request->file('image'),
+                $validated['name'],
+                'categories'
+            );
         }
 
         Category::create($validated);
@@ -59,7 +65,11 @@ class CategoryController extends Controller
             if ($category->image) {
                 Storage::disk('public')->delete($category->image);
             }
-            $validated['image'] = $request->file('image')->store('categories', 'public');
+            $validated['image'] = $this->storeImageWithSeoName(
+                $request->file('image'),
+                $validated['name'],
+                'categories'
+            );
         }
 
         $category->update($validated);
