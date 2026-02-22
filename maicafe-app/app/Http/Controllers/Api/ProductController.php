@@ -16,6 +16,7 @@ class ProductController extends Controller
      * - search: string (searches in name and description)
      * - category_id: int (filter by category ID)
      * - category: string (filter by category slug)
+     * - type: string (filter by product type: cafe or restaurant)
      * - featured: boolean (filter featured products)
      * - min_price: float (minimum price filter)
      * - max_price: float (maximum price filter)
@@ -60,6 +61,14 @@ class ProductController extends Controller
             if ($category) {
                 $query->where('category_id', $category->id);
             }
+        }
+
+        // Filter by product type (cafe or restaurant) via category
+        $productType = $request->input('type') ?? $request->query('type');
+        if (!empty($productType) && in_array($productType, ['cafe', 'restaurant'])) {
+            $query->whereHas('category', function ($q) use ($productType) {
+                $q->where('type', $productType);
+            });
         }
 
         // Filter by featured
@@ -162,6 +171,7 @@ class ProductController extends Controller
         if (!empty($search)) $appliedFilters['search'] = $search;
         if (!empty($categoryId)) $appliedFilters['category_id'] = $categoryId;
         if (!empty($categorySlug)) $appliedFilters['category'] = $categorySlug;
+        if (!empty($productType)) $appliedFilters['type'] = $productType;
         if ($request->has('featured')) $appliedFilters['featured'] = $request->boolean('featured');
         if ($request->filled('min_price')) $appliedFilters['min_price'] = (float) $request->input('min_price');
         if ($request->filled('max_price')) $appliedFilters['max_price'] = (float) $request->input('max_price');
@@ -237,8 +247,10 @@ class ProductController extends Controller
             'category' => $product->category ? [
                 'id' => $product->category->id,
                 'name' => $product->category->name,
+                'type' => $product->category->type,
                 'slug' => $product->category->slug,
             ] : null,
+            'product_type' => $product->category ? $product->category->type : null,
         ];
 
         // Add additional details for single product view

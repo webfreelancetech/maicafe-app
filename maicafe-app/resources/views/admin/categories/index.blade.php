@@ -16,6 +16,7 @@
             <tr>
                 <th>Image</th>
                 <th>Name</th>
+                <th>Type</th>
                 <th>Status</th>
                 <th>Actions</th>
             </tr>
@@ -31,6 +32,11 @@
                     @endif
                 </td>
                 <td>{{ $category->name }}</td>
+                <td>
+                    <span class="badge" style="background: {{ $category->type === 'restaurant' ? '#fef3c7' : '#dbeafe' }}; color: {{ $category->type === 'restaurant' ? '#92400e' : '#1e40af' }};">
+                        {{ ucfirst($category->type) }}
+                    </span>
+                </td>
                 <td>
                     <span class="badge {{ $category->is_active ? 'badge-success' : 'badge-danger' }}">
                         {{ $category->is_active ? 'Active' : 'Inactive' }}
@@ -51,7 +57,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="4" style="text-align: center; padding: 40px; color: #6b7280;">No categories found</td>
+                <td colspan="5" style="text-align: center; padding: 40px; color: #6b7280;">No categories found</td>
             </tr>
             @endforelse
         </tbody>

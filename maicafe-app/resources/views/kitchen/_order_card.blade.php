@@ -21,7 +21,15 @@
         @endphp
         <div class="order-item">
             <div class="item-info">
-                <div class="item-name">{{ $item->product_name }}</div>
+                <div class="item-name">
+                    {{ $item->product_name }}
+                    @if($item->product && $item->product->category)
+                    @php $pType = $item->product->category->type; @endphp
+                    <span style="display:inline-block; font-size: 10px; padding: 1px 6px; border-radius: 3px; margin-left: 4px; background: {{ $pType === 'restaurant' ? '#fef3c7' : '#dbeafe' }}; color: {{ $pType === 'restaurant' ? '#92400e' : '#1e40af' }}; font-weight: 600; vertical-align: middle;">
+                        {{ ucfirst($pType) }}
+                    </span>
+                    @endif
+                </div>
                 @if($variant || count($addons) > 0)
                 <div class="item-details">
                     @if($variant)

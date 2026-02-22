@@ -36,6 +36,7 @@ class CategoryController extends Controller
                     $data = [
                         'id' => $category->id,
                         'name' => $category->name,
+                        'type' => $category->type,
                         'slug' => $category->slug,
                         'image' => $category->image,
                         'sort_order' => $category->sort_order,
@@ -75,7 +76,7 @@ class CategoryController extends Controller
         $perPage = $request->input('per_page', 15);
         $products = $category->products()
             ->where('is_active', true)
-            ->with(['activeVariants'])
+            ->with(['activeVariants', 'category'])
             ->orderBy('sort_order', 'asc')
             ->orderBy('name', 'asc')
             ->paginate($perPage);
@@ -86,6 +87,7 @@ class CategoryController extends Controller
                 'category' => [
                     'id' => $category->id,
                     'name' => $category->name,
+                    'type' => $category->type,
                     'slug' => $category->slug,
                     'image' => $category->image,
                 ],
@@ -120,6 +122,7 @@ class CategoryController extends Controller
             'is_featured' => $product->is_featured,
             'has_variants' => $product->has_variants,
             'customization_options' => $product->customization_options,
+            'product_type' => $product->category ? $product->category->type : null,
         ];
 
         if ($product->has_variants && $product->activeVariants->count() > 0) {

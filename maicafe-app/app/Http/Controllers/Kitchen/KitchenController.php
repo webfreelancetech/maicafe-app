@@ -16,29 +16,30 @@ class KitchenController extends Controller
     {
         $date = $request->get('date', now()->toDateString());
         
-        // Get order counts for stats
+        // Get order counts for stats (exclude awaiting_payment - those haven't paid yet)
         $stats = [
             'pending' => Order::forDate($date)->whereIn('status', ['pending', 'confirmed'])->count(),
             'preparing' => Order::forDate($date)->where('status', 'preparing')->count(),
             'ready' => Order::forDate($date)->whereIn('status', ['ready', 'out_for_delivery'])->count(),
             'completed' => Order::forDate($date)->where('status', 'completed')->count(),
-            'total' => Order::forDate($date)->count(),
+            'total' => Order::forDate($date)->whereNotIn('status', ['awaiting_payment'])->count(),
+            'awaiting_payment' => Order::forDate($date)->where('status', 'awaiting_payment')->count(),
         ];
 
         // Get orders grouped by status
-        $pendingOrders = Order::with('items')
+        $pendingOrders = Order::with('items.product.category')
             ->forDate($date)
             ->whereIn('status', ['pending', 'confirmed'])
             ->orderBy('daily_token')
             ->get();
 
-        $preparingOrders = Order::with('items')
+        $preparingOrders = Order::with('items.product.category')
             ->forDate($date)
             ->where('status', 'preparing')
             ->orderBy('daily_token')
             ->get();
 
-        $readyOrders = Order::with('items')
+        $readyOrders = Order::with('items.product.category')
             ->forDate($date)
             ->whereIn('status', ['ready', 'out_for_delivery'])
             ->orderBy('daily_token')
@@ -61,7 +62,7 @@ class KitchenController extends Controller
         $date = $request->get('date', now()->toDateString());
         $status = $request->get('status');
 
-        $query = Order::with(['items', 'user'])
+        $query = Order::with(['items.product.category', 'user'])
             ->forDate($date)
             ->orderBy('daily_token', 'desc');
 
@@ -79,7 +80,7 @@ class KitchenController extends Controller
      */
     public function orderDetail(Order $order)
     {
-        $order->load('items', 'user');
+        $order->load('items.product.category', 'user');
         return view('kitchen.order-detail', compact('order'));
     }
 
@@ -138,21 +139,21 @@ class KitchenController extends Controller
     {
         $date = $request->get('date', now()->toDateString());
 
-        $pending = Order::with('items')
+        $pending = Order::with('items.product.category')
             ->forDate($date)
             ->whereIn('status', ['pending', 'confirmed'])
             ->orderBy('daily_token')
             ->get()
             ->map(fn($o) => $this->formatOrderForJson($o));
 
-        $preparing = Order::with('items')
+        $preparing = Order::with('items.product.category')
             ->forDate($date)
             ->where('status', 'preparing')
             ->orderBy('daily_token')
             ->get()
             ->map(fn($o) => $this->formatOrderForJson($o));
 
-        $ready = Order::with('items')
+        $ready = Order::with('items.product.category')
             ->forDate($date)
             ->whereIn('status', ['ready', 'out_for_delivery'])
             ->orderBy('daily_token')
@@ -164,7 +165,8 @@ class KitchenController extends Controller
             'preparing' => $preparing->count(),
             'ready' => $ready->count(),
             'completed' => Order::forDate($date)->where('status', 'completed')->count(),
-            'total' => Order::forDate($date)->count(),
+            'total' => Order::forDate($date)->whereNotIn('status', ['awaiting_payment'])->count(),
+            'awaiting_payment' => Order::forDate($date)->where('status', 'awaiting_payment')->count(),
         ];
 
         return response()->json([
@@ -194,6 +196,7 @@ class KitchenController extends Controller
                     'quantity' => $item->quantity,
                     'variant' => $customizations['variant'] ?? null,
                     'addons' => $customizations['addons'] ?? [],
+                    'product_type' => $item->product && $item->product->category ? $item->product->category->type : null,
                 ];
             }),
         ];

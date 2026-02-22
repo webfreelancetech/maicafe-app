@@ -21,6 +21,17 @@
         </div>
 
         <div class="form-group">
+            <label for="type">Category Type*</label>
+            <select name="type" id="type" required>
+                <option value="cafe" {{ old('type', $category->type) === 'cafe' ? 'selected' : '' }}>Cafe</option>
+                <option value="restaurant" {{ old('type', $category->type) === 'restaurant' ? 'selected' : '' }}>Restaurant</option>
+            </select>
+            @error('type')
+                <span class="form-error">{{ $message }}</span>
+            @enderror
+        </div>
+
+        <div class="form-group">
             <label for="image">Category Image</label>
             @if($category->image)
             <div style="margin-bottom: 12px;">

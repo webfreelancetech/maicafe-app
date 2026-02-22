@@ -43,7 +43,14 @@
                     </span>
                     @endif
                 </td>
-                <td>{{ $product->category->name ?? 'N/A' }}</td>
+                <td>
+                    {{ $product->category->name ?? 'N/A' }}
+                    @if($product->category)
+                    <span class="badge" style="background: {{ $product->category->type === 'restaurant' ? '#fef3c7' : '#dbeafe' }}; color: {{ $product->category->type === 'restaurant' ? '#92400e' : '#1e40af' }}; font-size: 10px; margin-left: 4px;">
+                        {{ ucfirst($product->category->type) }}
+                    </span>
+                    @endif
+                </td>
                 <td>
                     @if($product->has_variants && $product->variants->count() > 0)
                         @php

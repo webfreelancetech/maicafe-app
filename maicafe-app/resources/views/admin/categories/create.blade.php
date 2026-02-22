@@ -23,6 +23,17 @@
         </div>
 
         <div class="form-group">
+            <label for="type">Category Type*</label>
+            <select name="type" id="type" required>
+                <option value="cafe" {{ old('type', 'cafe') === 'cafe' ? 'selected' : '' }}>Cafe</option>
+                <option value="restaurant" {{ old('type') === 'restaurant' ? 'selected' : '' }}>Restaurant</option>
+            </select>
+            @error('type')
+                <span class="form-error">{{ $message }}</span>
+            @enderror
+        </div>
+
+        <div class="form-group">
             <label for="image">Category Image*</label>
             <input type="file" name="image" id="image" accept="image/*" required>
             @error('image')
