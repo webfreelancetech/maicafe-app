@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Kitchen') - Mai Cafe</title>
+    <title>@yield('title', 'Counter') - Mai Cafe</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
@@ -15,18 +15,18 @@
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: #1a1a2e;
+            background: #1e3a5f;
             color: #fff;
             min-height: 100vh;
         }
         
         .header {
-            background: #16213e;
+            background: #0d2137;
             padding: 12px 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px solid #0f3460;
+            border-bottom: 2px solid #1e5f74;
             position: sticky;
             top: 0;
             z-index: 100;
@@ -49,7 +49,7 @@
         }
         
         .logo i {
-            color: #e94560;
+            color: #22c55e;
         }
         
         .nav-links {
@@ -72,12 +72,13 @@
         
         .nav-links a:hover,
         .nav-links a.active {
-            background: #0f3460;
+            background: #1e5f74;
             color: #fff;
         }
         
         .nav-links a.active {
-            background: #e94560;
+            background: #22c55e;
+            color: #000;
         }
         
         .header-right {
@@ -90,7 +91,7 @@
             font-size: 24px;
             font-weight: 700;
             font-family: 'Courier New', monospace;
-            color: #10b981;
+            color: #22c55e;
         }
         
         .user-info {
@@ -98,20 +99,21 @@
             align-items: center;
             gap: 12px;
             padding: 8px 16px;
-            background: #0f3460;
+            background: #1e5f74;
             border-radius: 8px;
         }
         
         .user-avatar {
             width: 36px;
             height: 36px;
-            background: linear-gradient(135deg, #e94560 0%, #c73659 100%);
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
             font-size: 14px;
+            color: #000;
         }
         
         .user-name {
@@ -158,7 +160,7 @@
         }
         
         .stat-item {
-            background: #16213e;
+            background: #0d2137;
             padding: 16px 24px;
             border-radius: 12px;
             text-align: center;
@@ -166,10 +168,10 @@
             border: 2px solid transparent;
         }
         
-        .stat-item.pending { border-color: #f59e0b; }
-        .stat-item.preparing { border-color: #3b82f6; }
-        .stat-item.ready { border-color: #10b981; }
-        .stat-item.completed { border-color: #6b7280; }
+        .stat-item.awaiting { border-color: #f59e0b; }
+        .stat-item.paid { border-color: #22c55e; }
+        .stat-item.collected { border-color: #3b82f6; }
+        .stat-item.pending { border-color: #f97316; }
         
         .stat-value {
             font-size: 36px;
@@ -177,10 +179,10 @@
             line-height: 1;
         }
         
-        .stat-item.pending .stat-value { color: #f59e0b; }
-        .stat-item.preparing .stat-value { color: #3b82f6; }
-        .stat-item.ready .stat-value { color: #10b981; }
-        .stat-item.completed .stat-value { color: #6b7280; }
+        .stat-item.awaiting .stat-value { color: #f59e0b; }
+        .stat-item.paid .stat-value { color: #22c55e; }
+        .stat-item.collected .stat-value { color: #3b82f6; }
+        .stat-item.pending .stat-value { color: #f97316; }
         
         .stat-label {
             font-size: 12px;
@@ -202,7 +204,7 @@
         .refresh-indicator .dot {
             width: 8px;
             height: 8px;
-            background: #10b981;
+            background: #22c55e;
             border-radius: 50%;
             animation: pulse 2s infinite;
         }
@@ -212,21 +214,46 @@
             50% { opacity: 0.3; }
         }
         
+        /* Alert messages */
+        .alert {
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .alert-success {
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid #22c55e;
+            color: #22c55e;
+        }
+        
+        .alert-error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+            color: #ef4444;
+        }
+        
         @yield('styles')
     </style>
 </head>
 <body>
     <div class="header">
         <div class="header-left">
-            <a href="{{ route('kitchen.dashboard') }}" class="logo">
-                <i class="fas fa-utensils"></i>
-                <span>Kitchen</span>
+            <a href="{{ route('counter.dashboard') }}" class="logo">
+                <i class="fas fa-cash-register"></i>
+                <span>Counter</span>
             </a>
             <nav class="nav-links">
-                <a href="{{ route('kitchen.dashboard') }}" class="{{ request()->routeIs('kitchen.dashboard') ? 'active' : '' }}">
-                    <i class="fas fa-tv"></i> Live Orders
+                <a href="{{ route('counter.sale') }}" class="{{ request()->routeIs('counter.sale') ? 'active' : '' }}">
+                    <i class="fas fa-cash-register"></i> New Sale
                 </a>
-                <a href="{{ route('kitchen.orders') }}" class="{{ request()->routeIs('kitchen.orders*') ? 'active' : '' }}">
+                <a href="{{ route('counter.dashboard') }}" class="{{ request()->routeIs('counter.dashboard') ? 'active' : '' }}">
+                    <i class="fas fa-money-bill-wave"></i> Payment Queue
+                </a>
+                <a href="{{ route('counter.orders') }}" class="{{ request()->routeIs('counter.orders*') ? 'active' : '' }}">
                     <i class="fas fa-list"></i> All Orders
                 </a>
             </nav>
@@ -240,14 +267,14 @@
             <div class="current-time" id="currentTime">00:00:00</div>
             <div class="user-info">
                 <div class="user-avatar">
-                    {{ strtoupper(substr(Auth::guard('kitchen')->user()->name, 0, 1)) }}
+                    {{ strtoupper(substr(Auth::guard('counter')->user()->name, 0, 1)) }}
                 </div>
                 <div>
-                    <div class="user-name">{{ Auth::guard('kitchen')->user()->name }}</div>
-                    <div class="user-role">{{ Auth::guard('kitchen')->user()->role }}</div>
+                    <div class="user-name">{{ Auth::guard('counter')->user()->name }}</div>
+                    <div class="user-role">{{ Auth::guard('counter')->user()->role }}</div>
                 </div>
             </div>
-            <form action="{{ route('kitchen.logout') }}" method="POST" style="margin: 0;">
+            <form action="{{ route('counter.logout') }}" method="POST" style="margin: 0;">
                 @csrf
                 <button type="submit" class="logout-btn">
                     <i class="fas fa-sign-out-alt"></i> Logout
@@ -257,6 +284,20 @@
     </div>
     
     <div class="main-content">
+        @if(session('success'))
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle"></i>
+            {{ session('success') }}
+        </div>
+        @endif
+        
+        @if(session('error'))
+        <div class="alert alert-error">
+            <i class="fas fa-exclamation-circle"></i>
+            {{ session('error') }}
+        </div>
+        @endif
+        
         @yield('content')
     </div>
     

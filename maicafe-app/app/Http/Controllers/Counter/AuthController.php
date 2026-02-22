@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Kitchen;
+namespace App\Http\Controllers\Counter;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
@@ -10,23 +10,23 @@ use Illuminate\Support\Facades\Auth;
 class AuthController extends Controller
 {
     /**
-     * The guard to use for kitchen authentication.
+     * The guard to use for counter authentication.
      */
-    protected $guard = 'kitchen';
+    protected $guard = 'counter';
 
     /**
-     * Show the login form for kitchen staff
+     * Show the login form for counter staff
      */
     public function showLoginForm()
     {
         if (Auth::guard($this->guard)->check()) {
             $user = Auth::guard($this->guard)->user();
-            if (in_array($user->role, ['kitchen', 'admin'])) {
-                return redirect()->route('kitchen.dashboard');
+            if (in_array($user->role, ['counter', 'admin'])) {
+                return redirect()->route('counter.dashboard');
             }
         }
         
-        return view('kitchen.auth.login');
+        return view('counter.auth.login');
     }
 
     /**
@@ -42,16 +42,16 @@ class AuthController extends Controller
         if (Auth::guard($this->guard)->attempt($credentials, $request->boolean('remember'))) {
             $user = Auth::guard($this->guard)->user();
             
-            // Check if user has kitchen or admin role
-            if (!in_array($user->role, ['kitchen', 'admin'])) {
+            // Check if user has counter or admin role
+            if (!in_array($user->role, ['counter', 'admin'])) {
                 Auth::guard($this->guard)->logout();
                 return back()->withErrors([
-                    'email' => 'Access denied. Kitchen staff or admin credentials required.',
+                    'email' => 'Access denied. Counter staff or admin credentials required.',
                 ])->withInput($request->only('email'));
             }
             
             $request->session()->regenerate();
-            return redirect()->intended(route('kitchen.dashboard'));
+            return redirect()->intended(route('counter.dashboard'));
         }
 
         return back()->withErrors([
@@ -66,9 +66,9 @@ class AuthController extends Controller
     {
         Auth::guard($this->guard)->logout();
         
-        // Only invalidate kitchen session keys, not the entire session
-        $request->session()->forget('login_kitchen_' . sha1('App\Models\User'));
+        // Only invalidate counter session keys, not the entire session
+        $request->session()->forget('login_counter_' . sha1('App\Models\User'));
         
-        return redirect()->route('kitchen.login');
+        return redirect()->route('counter.login');
     }
 }

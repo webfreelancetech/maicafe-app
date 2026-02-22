@@ -6,16 +6,16 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class KitchenAccess
+class AdminAccess
 {
     /**
-     * The guard to use for kitchen authentication.
+     * The guard to use for admin authentication.
      */
-    protected $guard = 'kitchen';
+    protected $guard = 'admin';
 
     /**
      * Handle an incoming request.
-     * Allow access only to users with 'kitchen' or 'admin' role.
+     * Only allow users with 'admin' role to access.
      */
     public function handle(Request $request, Closure $next)
     {
@@ -26,22 +26,21 @@ class KitchenAccess
                     'message' => 'Unauthenticated. Please login.',
                 ], 401);
             }
-            return redirect()->route('kitchen.login');
+            return redirect()->route('login');
         }
 
         $user = Auth::guard($this->guard)->user();
-        $allowedRoles = ['kitchen', 'admin'];
         
-        if (!in_array($user->role, $allowedRoles)) {
+        if ($user->role !== 'admin') {
             Auth::guard($this->guard)->logout();
             if ($request->ajax() || $request->wantsJson() || $request->expectsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Access denied. Kitchen staff access only.',
+                    'message' => 'Access denied. Admin access only.',
                 ], 403);
             }
-            return redirect()->route('kitchen.login')
-                ->with('error', 'Access denied. Kitchen staff access only.');
+            return redirect()->route('login')
+                ->with('error', 'Access denied. Admin access only.');
         }
 
         return $next($request);

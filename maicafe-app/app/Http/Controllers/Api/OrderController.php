@@ -220,9 +220,10 @@ class OrderController extends Controller
                     $paymentStatus = 'pending';
                     $orderStatus = 'pending'; // Will change to 'confirmed' after payment
                 } else {
-                    // Pay at counter - order can be processed immediately
-                    $paymentStatus = 'pending'; // Will be 'paid' when customer pays at counter
-                    $orderStatus = 'pending';
+                    // Pay at counter - order goes to "awaiting_payment" status
+                    // Customer needs to pay at counter first before order is sent to kitchen
+                    $paymentStatus = 'pending'; // Will be 'paid' when counter staff confirms payment
+                    $orderStatus = 'awaiting_payment'; // Will change to 'pending' after payment confirmed
                 }
 
                 // Create order
@@ -306,12 +307,14 @@ class OrderController extends Controller
                     'instructions' => 'Please complete online payment to confirm your order.',
                 ];
             } else {
+                // Pay at counter flow
                 $responseData['payment'] = [
-                    'required' => false,
+                    'required' => true,
                     'method' => 'pay_at_counter',
                     'amount' => (float) $order->total,
                     'currency' => Setting::get('currency_code', 'GBP'),
-                    'instructions' => 'Please pay at the counter when collecting your order.',
+                    'awaiting_confirmation' => true,
+                    'instructions' => 'Please proceed to the counter to complete your payment. Your order will be prepared once payment is confirmed.',
                 ];
             }
 
@@ -345,12 +348,12 @@ class OrderController extends Controller
             ], 404);
         }
 
-        // Only allow cancellation of pending orders
-        $cancellableStatuses = ['pending'];
+        // Only allow cancellation of pending or awaiting_payment orders
+        $cancellableStatuses = ['pending', 'awaiting_payment'];
         if (!in_array($order->status, $cancellableStatuses)) {
             return response()->json([
                 'success' => false,
-                'message' => 'This order cannot be cancelled. Only pending orders can be cancelled.',
+                'message' => 'This order cannot be cancelled. Only pending or awaiting payment orders can be cancelled.',
             ], 422);
         }
 
@@ -566,14 +569,27 @@ class OrderController extends Controller
             ], 404);
         }
 
-        $statusFlow = [
-            'pending' => ['label' => 'Order Placed', 'icon' => 'receipt', 'completed' => true],
-            'confirmed' => ['label' => 'Order Confirmed', 'icon' => 'check-circle', 'completed' => false],
-            'preparing' => ['label' => 'Preparing', 'icon' => 'fire', 'completed' => false],
-            'ready' => ['label' => 'Ready for Pickup', 'icon' => 'bell', 'completed' => false],
-            'out_for_delivery' => ['label' => 'Out for Delivery', 'icon' => 'motorcycle', 'completed' => false],
-            'completed' => ['label' => 'Completed', 'icon' => 'check-double', 'completed' => false],
-        ];
+        // Build status flow based on payment method
+        $statusFlow = [];
+        
+        if ($order->payment_method === 'pay_at_counter') {
+            $statusFlow = [
+                'awaiting_payment' => ['label' => 'Awaiting Payment', 'icon' => 'clock', 'completed' => true],
+                'pending' => ['label' => 'Payment Received', 'icon' => 'receipt', 'completed' => false],
+                'preparing' => ['label' => 'Preparing', 'icon' => 'fire', 'completed' => false],
+                'ready' => ['label' => 'Ready for Pickup', 'icon' => 'bell', 'completed' => false],
+                'completed' => ['label' => 'Completed', 'icon' => 'check-double', 'completed' => false],
+            ];
+        } else {
+            $statusFlow = [
+                'pending' => ['label' => 'Order Placed', 'icon' => 'receipt', 'completed' => true],
+                'confirmed' => ['label' => 'Order Confirmed', 'icon' => 'check-circle', 'completed' => false],
+                'preparing' => ['label' => 'Preparing', 'icon' => 'fire', 'completed' => false],
+                'ready' => ['label' => 'Ready for Pickup', 'icon' => 'bell', 'completed' => false],
+                'out_for_delivery' => ['label' => 'Out for Delivery', 'icon' => 'motorcycle', 'completed' => false],
+                'completed' => ['label' => 'Completed', 'icon' => 'check-double', 'completed' => false],
+            ];
+        }
 
         $currentStatusFound = false;
         foreach ($statusFlow as $status => &$info) {
@@ -676,6 +692,7 @@ class OrderController extends Controller
             'total' => (float) $order->total,
             'payment_method' => $order->payment_method,
             'payment_status' => $order->payment_status,
+            'is_awaiting_counter_payment' => $order->isAwaitingCounterPayment(),
             'created_at' => $order->created_at->toIso8601String(),
         ];
 

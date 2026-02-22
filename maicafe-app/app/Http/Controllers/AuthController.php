@@ -12,7 +12,7 @@ class AuthController extends Controller
 {
     public function showLoginForm()
     {
-        if (Auth::check()) {
+        if (Auth::guard('web')->check()) {
             return redirect()->route('home');
         }
         return view('auth.login');
@@ -28,12 +28,14 @@ class AuthController extends Controller
         $credentials = $request->only('email', 'password');
         $remember = $request->filled('remember');
 
-        // Only allow customers to login (role is null or 'customer')
-        if (Auth::attempt($credentials, $remember)) {
-            $user = Auth::user();
+        // Try to authenticate
+        if (Auth::guard('web')->attempt($credentials, $remember)) {
+            $user = Auth::guard('web')->user();
             
-            // Check if user is admin, redirect to admin dashboard
+            // Check if user is admin, also login to admin guard and redirect to admin dashboard
             if ($user->role === 'admin') {
+                Auth::guard('admin')->login($user, $remember);
+                $request->session()->regenerate();
                 return redirect()->route('admin.dashboard');
             }
 
@@ -48,7 +50,7 @@ class AuthController extends Controller
 
     public function showRegisterForm()
     {
-        if (Auth::check()) {
+        if (Auth::guard('web')->check()) {
             return redirect()->route('home');
         }
         return view('auth.register');
@@ -71,19 +73,19 @@ class AuthController extends Controller
             'role' => 'customer', // Set default role as customer
         ]);
 
-        Auth::login($user);
+        Auth::guard('web')->login($user);
 
         return redirect()->route('home')->with('success', 'Account created successfully! Welcome to Mai Cafe!');
     }
 
     public function logout(Request $request)
     {
-        Auth::logout();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        // Logout from web guard only
+        Auth::guard('web')->logout();
+        
+        // Forget only the web session key
+        $request->session()->forget('login_web_' . sha1('App\Models\User'));
 
         return redirect()->route('home')->with('success', 'You have been logged out successfully.');
     }
 }
-

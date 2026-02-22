@@ -13,7 +13,8 @@ class Order extends Model
         'customer_name', 'customer_email', 'customer_phone', 'customer_address',
         'delivery_address', 'order_type', 'subtotal', 'tax', 'delivery_charge',
         'discount', 'coupon_code', 'total', 'status', 'notes',
-        'payment_method', 'payment_status', 'payment_reference'
+        'payment_method', 'payment_status', 'payment_reference',
+        'payment_confirmed_by', 'payment_confirmed_at'
     ];
 
     protected $casts = [
@@ -23,6 +24,7 @@ class Order extends Model
         'discount' => 'decimal:2',
         'total' => 'decimal:2',
         'token_date' => 'date',
+        'payment_confirmed_at' => 'datetime',
     ];
 
     protected static function boot()
@@ -111,6 +113,31 @@ class Order extends Model
     public function items()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    /**
+     * Get the user who confirmed the payment at counter.
+     */
+    public function paymentConfirmedBy()
+    {
+        return $this->belongsTo(User::class, 'payment_confirmed_by');
+    }
+
+    /**
+     * Scope to get orders awaiting payment at counter
+     */
+    public function scopeAwaitingCounterPayment($query)
+    {
+        return $query->where('status', 'awaiting_payment')
+            ->where('payment_method', 'pay_at_counter');
+    }
+
+    /**
+     * Check if order is awaiting counter payment
+     */
+    public function isAwaitingCounterPayment()
+    {
+        return $this->status === 'awaiting_payment' && $this->payment_method === 'pay_at_counter';
     }
 }
 
