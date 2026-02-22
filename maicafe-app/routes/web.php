@@ -16,6 +16,8 @@ use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\AddonGroupController;
 use App\Http\Controllers\Kitchen\KitchenController;
 use App\Http\Controllers\Kitchen\AuthController as KitchenAuthController;
+use App\Http\Controllers\Counter\CounterController;
+use App\Http\Controllers\Counter\AuthController as CounterAuthController;
 use App\Http\Controllers\OrderDisplayController;
 
 // E-commerce Routes
@@ -55,6 +57,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
     Route::post('settings', [SettingController::class, 'update'])->name('settings.update');
+    Route::post('settings/email', [SettingController::class, 'updateEmail'])->name('settings.email.update');
+    Route::post('settings/email/test', [SettingController::class, 'testEmail'])->name('settings.email.test');
 });
 
 // Kitchen Routes
@@ -71,5 +75,29 @@ Route::prefix('kitchen')->name('kitchen.')->group(function () {
         Route::get('/orders/data', [KitchenController::class, 'ordersData'])->name('orders.data');
         Route::get('/orders/{order}', [KitchenController::class, 'orderDetail'])->name('orders.show');
         Route::post('/orders/{order}/status', [KitchenController::class, 'updateStatus'])->name('orders.updateStatus');
+    });
+});
+
+// Counter Routes
+Route::prefix('counter')->name('counter.')->group(function () {
+    // Auth routes (public)
+    Route::get('/login', [CounterAuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [CounterAuthController::class, 'login'])->name('login.submit');
+    Route::post('/logout', [CounterAuthController::class, 'logout'])->name('logout');
+    
+    // Protected routes (counter staff only)
+    Route::middleware('counter')->group(function () {
+        Route::get('/', [CounterController::class, 'dashboard'])->name('dashboard');
+        Route::get('/dashboard/data', [CounterController::class, 'dashboardData'])->name('dashboard.data');
+        Route::get('/orders', [CounterController::class, 'orders'])->name('orders');
+        Route::get('/orders/{order}', [CounterController::class, 'orderDetail'])->name('orders.show');
+        Route::post('/orders/{order}/confirm-payment', [CounterController::class, 'confirmPayment'])->name('orders.confirmPayment');
+        Route::post('/orders/{order}/cancel', [CounterController::class, 'cancelOrder'])->name('orders.cancel');
+        
+        // Counter Sale / POS
+        Route::get('/sale', [CounterController::class, 'newSale'])->name('sale');
+        Route::get('/sale/products', [CounterController::class, 'getProducts'])->name('sale.products');
+        Route::get('/sale/product/{id}', [CounterController::class, 'getProductDetails'])->name('sale.product');
+        Route::post('/sale/create', [CounterController::class, 'createSale'])->name('sale.create');
     });
 });

@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\BannerController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\WishlistController;
 use App\Http\Controllers\Api\CartController;
+use App\Http\Controllers\Api\CounterController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,16 +28,22 @@ use App\Http\Controllers\Api\CartController;
 |--------------------------------------------------------------------------
 */
 Route::prefix('auth')->group(function () {
-    // Registration
+    // Registration (Step 1: send OTP)
     Route::post('/register', [AuthController::class, 'register']);
-    
+
+    // Registration (Step 2: verify OTP and create account)
+    Route::post('/verify-email', [AuthController::class, 'verifyEmail']);
+
+    // Resend OTP (for registration or forgot_password)
+    Route::post('/resend-otp', [AuthController::class, 'resendOtp']);
+
     // Login
     Route::post('/login', [AuthController::class, 'login']);
-    
-    // Forgot Password
+
+    // Forgot Password (Step 1: send OTP)
     Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
-    
-    // Reset Password
+
+    // Reset Password (Step 2: verify OTP + set new password)
     Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 });
 
@@ -120,5 +127,14 @@ Route::middleware('auth:sanctum')->group(function () {
     // Legacy route for backward compatibility
     Route::get('/user', function (Request $request) {
         return $request->user();
+    });
+
+    // Counter Staff Routes (for counter payment confirmation)
+    Route::prefix('counter')->group(function () {
+        Route::get('/orders/awaiting-payment', [CounterController::class, 'awaitingPayment']); // Get orders awaiting payment
+        Route::get('/orders/{id}', [CounterController::class, 'orderDetails']); // Get order details
+        Route::post('/orders/{id}/confirm-payment', [CounterController::class, 'confirmPayment']); // Confirm payment
+        Route::post('/orders/{id}/cancel', [CounterController::class, 'cancelOrder']); // Cancel order
+        Route::get('/stats', [CounterController::class, 'stats']); // Get counter stats
     });
 });
