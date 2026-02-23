@@ -19,6 +19,11 @@ use App\Http\Controllers\Kitchen\AuthController as KitchenAuthController;
 use App\Http\Controllers\Counter\CounterController;
 use App\Http\Controllers\Counter\AuthController as CounterAuthController;
 use App\Http\Controllers\OrderDisplayController;
+use App\Http\Controllers\LegalController;
+
+// Legal Pages (Public)
+Route::get('/privacy-policy', [LegalController::class, 'privacyPolicy'])->name('privacy-policy');
+Route::get('/terms-and-conditions', [LegalController::class, 'termsAndConditions'])->name('terms-and-conditions');
 
 // E-commerce Routes
 Route::get('/', [EcommerceController::class, 'index'])->name('home');
