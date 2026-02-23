@@ -550,6 +550,59 @@ class AuthController extends Controller
     }
 
     // -------------------------------------------------------------------------
+    // ACCOUNT DELETION
+    // -------------------------------------------------------------------------
+
+    /**
+     * DELETE /api/user/account
+     *
+     * Soft-deletes the authenticated user's account.
+     * The email is obfuscated so the user can re-register with the same email later.
+     * Requires password confirmation to prevent accidental deletion.
+     */
+    public function deleteAccount(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'password' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors'  => $validator->errors(),
+            ], 422);
+        }
+
+        $user = $request->user();
+
+        if (!Hash::check($request->password, $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Password is incorrect',
+                'errors'  => ['password' => ['The password you entered is incorrect.']],
+            ], 422);
+        }
+
+        // Revoke all tokens before deleting
+        $user->tokens()->delete();
+
+        // Obfuscate the email so the unique constraint is freed for re-registration
+        $user->update([
+            'original_email' => $user->email,
+            'email'          => 'deleted_' . $user->id . '_' . time() . '@deleted.invalid',
+        ]);
+
+        // Soft delete the account
+        $user->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Your account has been deleted successfully.',
+        ], 200);
+    }
+
+    // -------------------------------------------------------------------------
     // PRIVATE HELPERS
     // -------------------------------------------------------------------------
 
