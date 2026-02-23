@@ -14,6 +14,14 @@ define('LARAVEL_START', microtime(true));
 
 /*
 |--------------------------------------------------------------------------
+| Set Application Base Path
+| Laravel core lives in /core, so .env and all app folders are there.
+|--------------------------------------------------------------------------
+*/
+$_ENV['APP_BASE_PATH'] = __DIR__ . '/core';
+
+/*
+|--------------------------------------------------------------------------
 | Check If The Application Is Under Maintenance
 |--------------------------------------------------------------------------
 */
